@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bingo Musical 90s</title>
+  <title>Bingo Musical</title>
 
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
@@ -15,15 +15,19 @@
   color: #fff;
   text-align: center;
   margin: 0;
-  padding: 20px;
+  padding: clamp(10px, 3vw, 24px);
 }
 
     h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.8rem, 4.8vw, 2.5rem);
         text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
         margin-bottom: 20px;
     }
 
+    .app {
+        width: min(100%, 900px);
+        margin: 0 auto;
+    }
 
 .legal-note {
     max-width: 700px;
@@ -38,9 +42,9 @@
 
 #board {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    max-width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(4px, 1.2vw, 8px);
+    width: min(100%, 680px);
     margin: 20px auto;
 }
 
@@ -48,7 +52,9 @@
     background: rgba(255,255,255,0.15);
     border: 2px solid rgba(255,255,255,0.3);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: clamp(0.68rem, 1.8vw, 1rem);
+    line-height: 1.2;
+    text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
     color: #fff;
@@ -76,9 +82,23 @@
 }
 
 /* 🔹 Ajuste extra para móviles */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    #board {
+        width: min(100%, 560px);
+    }
+
     .cell {
-        font-size: 0.8rem;
+        font-size: clamp(0.62rem, 2.4vw, 0.9rem);
+    }
+}
+
+@media (max-width: 480px) {
+    #board {
+        width: min(100%, 420px);
+    }
+
+    .cell {
+        font-size: clamp(0.56rem, 2.9vw, 0.8rem);
     }
 }
 
@@ -110,7 +130,8 @@
   </style>
 </head>
 <body>
-  <h1>Bingo Musical 90s</h1>
+  <main class="app">
+  <h1>Bingo Musical</h1>
   <p>Toca cada casilla cuando escuches la canción 🎶</p>
   <p class="legal-note">Aviso legal: Esta app no almacena ni reproduce música, y no incluye archivos MP3.</p>
   <div id="board"></div>
@@ -252,6 +273,7 @@
 
     generateBoard();
   </script>
+  </main>
 </body>
 </html>
 
