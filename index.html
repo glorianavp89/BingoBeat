@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bingo Musical 90s</title> 
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+
+ <style>
+    body {
+  font-family: 'Arial', sans-serif;
+  background: radial-gradient(circle at top, #1a1a1a, #000000 70%);
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+
+    h1 {
+        font-size: 2.5rem;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+        margin-bottom: 20px;
+    }
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    max-width: 100%;
+    margin: 20px auto;
+}
+
+.cell {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+    /* 🔹 Truco para que las celdas sean cuadradas y no gigantes */
+    aspect-ratio: 1 / 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* quitamos el padding que las inflaba */
+}
+
+.cell:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.cell.marked {
+    background: #00ffcc;
+    color: #222;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+    transform: scale(1.05);
+}
+
+/* 🔹 Ajuste extra para móviles */
+@media (max-width: 600px) {
+    .cell {
+        font-size: 0.8rem;
+    }
+}
+
+    button {
+        background: linear-gradient(90deg, #ff8a00, #e52e71);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        font-size: 1rem;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+        background: linear-gradient(90deg, #e52e71, #ff8a00);
+        transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>Bingo Musical 90s</h1>
+  <p>Toca cada casilla cuando escuches la canción 🎶</p>
+  <div id="board"></div>
+  <button id="bingoBtn">¡Bingo!</button>
+
+  <script>
+    const songs = [
+      "Nirvana – Smells Like Teen Spirit",
+      "Oasis – Wonderwall",
+      "Alanis Morissette – Ironic",
+      "Red Hot Chili Peppers – Californication",
+      "No Doubt – Don’t Speak",
+      "Radiohead – Creep",
+      "R.E.M. – Losing My Religion",
+      "The Cranberries – Zombie",
+      "Blur – Song 2",
+      "Smashing Pumpkins – 1979",
+      "Pearl Jam – Alive",
+      "Green Day – Basket Case",
+      "Blink-182 – All the Small Things",
+      "Queen – Somebody to Love",
+      "Aerosmith – I Don’t Want to Miss a Thing",
+      "U2 – Beautiful Day",
+      "Bon Jovi – Always",
+      "Bryan Adams – (Everything I Do) I Do It for You",
+      "Ace of Base – All That She Wants",
+      "Spice Girls – Wannabe",
+      "Backstreet Boys – I Want It That Way",
+      "Britney Spears – ...Baby One More Time",
+      "Christina Aguilera – Genie in a Bottle",
+      "NSYNC – Tearin’ Up My Heart",
+      "Ricky Martin – Livin’ la Vida Loca",
+      "Shakira – Estoy Aquí",
+      "Soda Stereo – De Música Ligera",
+      "Maná – Clavado en un Bar",
+      "Shania Twain – That Don’t Impress Me Much",
+      "Savage Garden – Truly Madly Deeply",
+      "Hanson – MMMBop",
+      "Natalie Imbruglia – Torn",
+      "Eagle-Eye Cherry – Save Tonight",
+      "Seal – Kiss from a Rose",
+      "Molotov – Puto",
+      "Destiny’s Child – Say My Name",
+      "Butterfly - Crazy Town",
+      "Mr. Brightside - The Killers",
+      "MC Hammer – U Can’t Touch This",
+      "Vanilla Ice – Ice Ice Baby",
+      "Will Smith – Gettin’ Jiggy Wit It",
+      "Coolio – Gangsta’s Paradise",
+      "2Pac – California Love",
+      "Ingrata – Café Tacuba",
+      "Madonna – Ray of Light",
+      "Cher – Believe",
+      "Celine Dion – My Heart Will Go On",
+      "Mariah Carey – Fantasy",
+      "Al final- Suite Doble",
+      "Just a Girl - No Doubt",
+      "Bersuit Vergarabat - Se viene",
+      "Aqua – Barbie Girl",
+      "Los del Río – Macarena",
+      "Break Stuff – Limp Bizkit",
+      "Haddaway – What Is Love",
+      "Corona – The Rhythm of the Night",
+      "La Bouche – Be My Lover",
+      "La ley – El Duelo",
+      "Limp Bizkit – My Way",
+      "Chumbawamba – Tubthumping"
+    ];
+
+    function generateBoard() {
+      let board = document.getElementById("board");
+      board.innerHTML = "";
+      let shuffled = songs.sort(() => 0.5 - Math.random());
+      let selected = shuffled.slice(0, 24);
+      let idx = 0;
+
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          let cell = document.createElement("div");
+          cell.className = "cell";
+
+          if (row === 2 && col === 2) {
+            cell.innerText = "FREE SPACE";
+            cell.classList.add("free", "marked");
+          } else {
+            cell.innerText = selected[idx];
+            idx++;
+          }
+
+          cell.addEventListener("click", () => {
+            cell.classList.toggle("marked");
+          });
+
+          board.appendChild(cell);
+        }
+      }
+    }
+
+    document.getElementById("bingoBtn").addEventListener("click", () => {
+      alert("🎉 ¡Bingo! Verifica con el host si ganaste.");
+    });
+
+    generateBoard();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
