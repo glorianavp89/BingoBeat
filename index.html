@@ -82,6 +82,14 @@
     }
 }
 
+    .controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
     button {
         background: linear-gradient(90deg, #ff8a00, #e52e71);
         border: none;
@@ -91,7 +99,7 @@
         border-radius: 30px;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 20px;
+        margin-top: 0;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
@@ -106,7 +114,10 @@
   <p>Toca cada casilla cuando escuches la canción 🎶</p>
   <p class="legal-note">Aviso legal: Esta app no almacena ni reproduce música, y no incluye archivos MP3.</p>
   <div id="board"></div>
-  <button id="bingoBtn">¡Bingo!</button>
+  <div class="controls">
+    <button id="bingoBtn">¡Bingo!</button>
+    <button id="newCardBtn">Nuevo cartón</button>
+  </div>
 
   <script>
     const songs = [
@@ -173,16 +184,18 @@
     ];
 
     function generateBoard() {
-      let board = document.getElementById("board");
+      const board = document.getElementById("board");
       board.innerHTML = "";
-      let shuffled = songs.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, 24);
+      const shuffled = [...songs].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 24);
       let idx = 0;
 
       for (let row = 0; row < 5; row++) {
         for (let col = 0; col < 5; col++) {
-          let cell = document.createElement("div");
+          const cell = document.createElement("div");
           cell.className = "cell";
+          cell.dataset.row = row;
+          cell.dataset.col = col;
 
           if (row === 2 && col === 2) {
             cell.innerText = "FREE SPACE";
@@ -201,8 +214,40 @@
       }
     }
 
+    function countCompletedLines() {
+      const marked = Array.from({ length: 5 }, () => Array(5).fill(false));
+
+      document.querySelectorAll("#board .cell").forEach((cell) => {
+        const row = Number(cell.dataset.row);
+        const col = Number(cell.dataset.col);
+        marked[row][col] = cell.classList.contains("marked");
+      });
+
+      let lines = 0;
+
+      for (let i = 0; i < 5; i++) {
+        if (marked[i].every(Boolean)) lines++;
+        if (marked.every((row) => row[i])) lines++;
+      }
+
+      if ([0, 1, 2, 3, 4].every((i) => marked[i][i])) lines++;
+      if ([0, 1, 2, 3, 4].every((i) => marked[i][4 - i])) lines++;
+
+      return lines;
+    }
+
     document.getElementById("bingoBtn").addEventListener("click", () => {
-      alert("🎉 ¡Bingo! Verifica con el host si ganaste.");
+      const lines = countCompletedLines();
+
+      if (lines > 0) {
+        alert(`🎉 ¡Bingo! Tienes ${lines} línea(s) completa(s).`);
+      } else {
+        alert("Todavía no completas una línea. ¡Sigue jugando!");
+      }
+    });
+
+    document.getElementById("newCardBtn").addEventListener("click", () => {
+      generateBoard();
     });
 
     generateBoard();
