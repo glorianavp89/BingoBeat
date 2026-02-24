@@ -1,6 +1,6 @@
 {
-  "name": "Bingo Musical 90s",
-  "short_name": "Bingo90s",
+  "name": "Bingo Musical",
+  "short_name": "Bingo",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#000000",
