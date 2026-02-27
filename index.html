@@ -2,16 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bingo Musical</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body {
+      background-color: #000; /* fondo negro */
+      color: #fff;
       font-family: Arial, sans-serif;
       text-align: center;
       margin: 0;
       padding: 0;
-      background-color: #000; /* fondo negro */
-      color: #fff;
     }
 
     h1 { margin-top: 20px; }
@@ -33,9 +33,9 @@
     }
 
     .cell {
-      border: 2px solid #555;
-      background-color: #111; /* gris oscuro */
-      color: #fff;
+      border: 1px solid #333;
+      background-color: #f2f2f2; /* gris claro */
+      color: #000;
       text-align: center;
       cursor: pointer;
       display: flex;
@@ -51,17 +51,16 @@
     }
 
     .cell.marked {
-      /* efecto neón amarillo */
-      background-color: #111; /* mantiene el gris oscuro de base */
-      color: #ff0;
-      box-shadow: 0 0 5px #ff0, 0 0 10px #ff0, 0 0 20px #ff0;
+      background-color: #ffcc00; /* amarillo neón */
+      color: #000;
+      box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00, 0 0 20px #ffcc00;
     }
 
     .cell.free {
       font-weight: bold;
-      background-color: #222;
-      color: #0f0;
-      box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, 0 0 20px #0f0;
+      background-color: #99ff99; /* verde neón */
+      color: #000;
+      box-shadow: 0 0 5px #99ff99, 0 0 10px #99ff99, 0 0 20px #99ff99;
     }
 
     button {
@@ -77,7 +76,7 @@
     }
 
     button:hover {
-      box-shadow: 0 0 5px #ff0, 0 0 10px #ff0;
+      box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00;
     }
 
     @media (max-width: 400px) {
@@ -88,146 +87,88 @@
   </style>
 </head>
 <body>
-  <h1>Bingo Musical</h1>
-  <div id="instructions">
-    Haz click en las casillas cuando salga la canción. Marca líneas horizontales, verticales, diagonales o las cuatro esquinas para ganar.
-  </div>
+  <main>
+    <h1>🎵 Bingo Musical 🎵</h1>
+    <div id="instructions">
+      Haz click en las casillas cuando salga la canción. Marca líneas horizontales, verticales, diagonales o las cuatro esquinas para ganar.
+    </div>
+    <div id="board"></div>
+    <div>
+      <button id="newCardBtn">Nuevo Cartón</button>
+      <button id="bingoBtn">Verificar Bingo</button>
+    </div>
 
-  <div id="board"></div>
-  <button id="bingoBtn">Verificar Bingo</button>
-  <button id="newCardBtn">Nuevo Cartón</button>
+    <script>
+      const songs = [
+        /* Pega aquí tus 60 canciones exactas de Spotify */
+      ];
 
-  <script>
-    const songs = [
-      "Lo que pasó pasó, Daddy Yankee",
-      "Perdóname, Eddie Lover, Dempa",
-      "Dale don dale, Don Omar",
-      "Soy una gárgola, Alex Gárgolas, Randy notaloca",
-      "Bandoleros, Don Omar, Tego Calderón",
-      "Rakatá, Wisin y Yandel",
-      "Rompe, Daddy Yankee",
-      "Yo voy, Fit Daddy Yankee, Zion y Lennox",
-      "Gasolina, Daddy Yankee",
-      "Sensación del bloque, de la Ghetto Randy",
-      "Atrévete, Calle 13",
-      "Es un secreto, Plan B",
-      "Dile, Don Omar",
-      "Virtual Diva, Don Omar",
-      "En la cama, Nicky Jam, Daddy Yankee",
-      "Fútbol, Lil Jon",
-      "Ella me levantó, Daddy Yankee",
-      "Pasarela, Ñejo y Dálmata",
-      "No quiere novio, Ñejo, Tego Calderón",
-      "Perreo Baby, Héctor, Comatito",
-      "Siente el boom, Fit Randy, Boy Wonder, Zef, Tito el Bambino, Randy",
-      "Se vale todo, todo, Calle 13",
-      "Quiero bailar, Ivy Queen",
-      "Ven bailando, Ángel y Critz",
-      "Baila morena, con Luny Tunes, de Héctor y Tito, Luny Tunes, Noriega",
-      "Papi chulo, te traigo el... Norma",
-      "Todavía, Jay Pablito, La Factoría",
-      "Yo y sí",
-      "Mueve mami, El Chombo, Aldo Ranks",
-      "Déjale caer todo el peso. Héctor el father, Jomo",
-      "Mayor que yo, Wisin y Yandel, Pose, Nari Yankee, Candy, Plan B",
-      "Oye mi canto, Contego Calderón, Nina Sky, Nore",
-      "La botella, Match and Daddy",
-      "Salgo pa' la calle, Dary Yankee, Randy, Nota loca",
-      "Quítate tú, pa' ponerme yo, Eddie Dee, Dary Yankee, Gallego",
-      "Un poco loca, Fit de La Ghetto, Joey y Randy, De La Ghetto",
-      "Frikitona, Plan B, Flow natural, Tito el Bambino, Vinnie M",
-      "Noche de sexo, Wisin y Yandel, Romeo Santos",
-      "Para que la pases bien, Arcángel",
-      "Salió el sol, Don Omar",
-      "Ella me levantó, Dary Yankee, Flow, RKM y Ken Wild",
-      "Te he querido, te he llorado, Ivy Queen",
-      "Aparentemente, Laga y Maki, Arcángel, De La Ghetto",
-      "Nada de na, Ángel y Kiss, Chogo",
-      "Abusadora, Wisin y Yandel, fanática sexual, Plan B",
-      "No me dejes solo, Dary Yankee, Wisin y Yandel, Impacto, Dary Yankee",
-      "Danza kuduro, Don Omar",
-      "Habla Don Omar",
-      "Pam Pam, Wisin y Yandel",
-      "Tego Calderón, Guatauba",
-      "Burn it up con Wisin y Yandel",
-      "R. Kelly, Cochinear",
-      "DJ Nelson, Suave Mix",
-      "Blast Remix de Calle 13",
-      "Pata Bata 2, Latin Fresh",
-      "Chuli, Chulín",
-      "Chunfly de Voltio y Calle 13",
-      "Tócate toda, Big Yomo, Natia"
-    ];
+      function shuffle(array){
+        let currentIndex = array.length, randomIndex;
+        while(currentIndex !== 0){
+          randomIndex = Math.floor(Math.random()*currentIndex);
+          currentIndex--;
+          [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+      }
 
-    function generateBoard() {
-      const board = document.getElementById("board");
-      board.innerHTML = "";
-      const shuffled = [...songs].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 24);
-      let idx = 0;
+      function generateBoard(){
+        const board = document.getElementById("board");
+        board.innerHTML = "";
+        const shuffled = shuffle([...songs]);
+        const selected = shuffled.slice(0,24);
+        let idx = 0;
+        for(let row=0; row<5; row++){
+          for(let col=0; col<5; col++){
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.dataset.row = row;
+            cell.dataset.col = col;
 
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 5; col++) {
-          const cell = document.createElement("div");
-          cell.className = "cell";
-          cell.dataset.row = row;
-          cell.dataset.col = col;
+            if(row===2 && col===2){
+              cell.innerText = "FREE SPACE";
+              cell.classList.add("free","marked");
+            }else{
+              cell.innerText = selected[idx]; idx++;
+            }
 
-          if (row === 2 && col === 2) {
-            cell.innerText = "FREE SPACE";
-            cell.classList.add("free", "marked");
-          } else {
-            cell.innerText = selected[idx];
-            idx++;
+            cell.addEventListener("click",()=>{cell.classList.toggle("marked");});
+            board.appendChild(cell);
           }
-
-          cell.addEventListener("click", () => {
-            cell.classList.toggle("marked");
-          });
-
-          board.appendChild(cell);
         }
       }
-    }
 
-    function countCompletedLines() {
-      const marked = Array.from({ length: 5 }, () => Array(5).fill(false));
-      document.querySelectorAll("#board .cell").forEach(cell => {
-        const row = Number(cell.dataset.row);
-        const col = Number(cell.dataset.col);
-        marked[row][col] = cell.classList.contains("marked");
+      function countCompletedLines(){
+        const marked = Array.from({length:5},()=>Array(5).fill(false));
+        document.querySelectorAll("#board .cell").forEach(cell=>{
+          const row = Number(cell.dataset.row);
+          const col = Number(cell.dataset.col);
+          marked[row][col]=cell.classList.contains("marked");
+        });
+        let lines=0;
+        for(let i=0;i<5;i++){
+          if(marked[i].every(Boolean)) lines++;
+          if(marked.every(row=>row[i])) lines++;
+        }
+        if([0,1,2,3,4].every(i=>marked[i][i])) lines++;
+        if([0,1,2,3,4].every(i=>marked[i][4-i])) lines++;
+        if(marked[0][0] && marked[0][4] && marked[4][0] && marked[4][4]) lines++;
+        return lines;
+      }
+
+      document.getElementById("bingoBtn").addEventListener("click",()=>{
+        const lines = countCompletedLines();
+        if(lines>0){
+          alert(`🎉 ¡Bingo! Tienes ${lines} línea(s) completa(s).`);
+        }else{
+          alert("Todavía no completas una línea. ¡Sigue jugando!");
+        }
       });
 
-      let lines = 0;
-
-      // Horizontales y verticales
-      for (let i = 0; i < 5; i++) {
-        if (marked[i].every(Boolean)) lines++;
-        if (marked.every(row => row[i])) lines++;
-      }
-
-      // Diagonales
-      if ([0,1,2,3,4].every(i => marked[i][i])) lines++;
-      if ([0,1,2,3,4].every(i => marked[i][4-i])) lines++;
-
-      // Cuatro esquinas
-      if (marked[0][0] && marked[0][4] && marked[4][0] && marked[4][4]) lines++;
-
-      return lines;
-    }
-
-    document.getElementById("bingoBtn").addEventListener("click", () => {
-      const lines = countCompletedLines();
-      if (lines > 0) {
-        alert(`🎉 ¡Bingo! Tienes ${lines} línea(s) completa(s).`);
-      } else {
-        alert("Todavía no completas una línea. ¡Sigue jugando!");
-      }
-    });
-
-    document.getElementById("newCardBtn").addEventListener("click", generateBoard);
-
-    generateBoard();
-  </script>
+      document.getElementById("newCardBtn").addEventListener("click", generateBoard);
+      generateBoard();
+    </script>
+  </main>
 </body>
 </html>
