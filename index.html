@@ -144,6 +144,27 @@ button:hover {
   </div>
 
   <script>
+    // 🔹 Generar o recuperar player ID
+    const playerID = localStorage.getItem('playerID') || `player-${Math.floor(Math.random()*10000)}`;
+    localStorage.setItem('playerID', playerID);
+
+    // 🔹 Función para guardar celdas marcadas
+    function saveMarkedCells() {
+      const markedCells = Array.from(document.querySelectorAll("#board .cell")).map(cell =>
+        cell.classList.contains("marked")
+      );
+      localStorage.setItem(`${playerID}-markedCells`, JSON.stringify(markedCells));
+    }
+
+    // 🔹 Función para cargar celdas marcadas
+    function loadMarkedCells() {
+      const saved = JSON.parse(localStorage.getItem(`${playerID}-markedCells`)) || [];
+      const cells = document.querySelectorAll("#board .cell");
+      cells.forEach((cell, idx) => {
+        if (saved[idx]) cell.classList.add("marked");
+      });
+    }
+
     const songs = [
       "Lo Que Pasó, Pasó – Daddy Yankee",
       "Perdóname – Eddie Lover ft. La Factoría",
@@ -229,11 +250,13 @@ button:hover {
 
           cell.addEventListener("click", () => {
             cell.classList.toggle("marked");
+            saveMarkedCells();
           });
 
           board.appendChild(cell);
         }
       }
+      loadMarkedCells();
     }
 
     document.getElementById("bingoBtn").addEventListener("click", () => {
@@ -272,6 +295,7 @@ button:hover {
 
     document.getElementById("resetBtn").addEventListener("click", () => {
       if (confirm("¿Generar nuevo cartón? Se perderá el progreso actual.")) {
+        localStorage.removeItem(`${playerID}-markedCells`);
         generateBoard();
       }
     });
