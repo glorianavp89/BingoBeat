@@ -2,173 +2,273 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Bingo Musical</title>
-  <link rel="manifest" href="manifest.json">
-  <style>
-    body {
-      background-color: #000; /* fondo negro */
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BingoBeat</title> 
 
-    h1 { margin-top: 20px; }
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    #instructions {
-      font-size: 14px;
-      margin: 5px auto 20px auto;
-      max-width: 500px;
-      color: #ccc;
-    }
+ <style>
+  body {
+  font-family: 'Arial', sans-serif;
+  background: radial-gradient(circle at top, #1a1a1a, #000000 70%);
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
 
+h1 {
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+    margin-bottom: 80px;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  width: 100%;
+  margin: 0 auto 60px auto;
+}
+#board div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px;
+  font-size: clamp(8px, 3vw, 12px);
+  word-break: break-word;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+}
+#board div.marked {
+  background: linear-gradient(135deg, #00c9a7, #00ffcc);
+  color: #111;
+  font-weight: bold;
+  box-shadow: 0 0 15px rgba(0,255,200,0.6);
+}
+
+.cell {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    font-size: clamp(8px, 3vw, 12px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+    /* 🔹 Truco para que las celdas sean cuadradas y no gigantes */
+    aspect-ratio: 1 / 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0; /* quitamos el padding que las inflaba */
+}
+
+.cell:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.cell.marked {
+    background: #00ffcc;
+    color: #222;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+    transform: scale(1.05);
+}
+
+button {
+  background: linear-gradient(90deg, #ff8a00, #e52e71);
+  border: none;
+  color: white;
+  padding: 14px;
+  font-size: 1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+  width: 100%;
+  margin-top: 20px;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #e52e71, #ff8a00);
+    transform: scale(1.05);
+}
+
+.container {
+  max-width: 500px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+/* 🔹 Ajustes responsivos para móviles modernos */
+@media (max-width: 650px) {
     #board {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-gap: 5px;
-      width: 95%;
-      max-width: 500px;
-      margin: 0 auto 20px auto;
+        gap: 4px;              /* reduce espacio entre celdas */
+        margin-bottom: 80px;   /* espacio suficiente para el botón */
     }
 
     .cell {
-      border: 1px solid #333;
-      background-color: #f2f2f2; /* gris claro */
-      color: #000;
-      text-align: center;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 12px;
-      padding: 5px;
-      height: 80px;
-      border-radius: 10px; /* bordes redondeados */
-      overflow: hidden;
-      word-wrap: break-word;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .cell.marked {
-      background-color: #ffcc00; /* amarillo neón */
-      color: #000;
-      box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00, 0 0 20px #ffcc00;
-    }
-
-    .cell.free {
-      font-weight: bold;
-      background-color: #99ff99; /* verde neón */
-      color: #000;
-      box-shadow: 0 0 5px #99ff99, 0 0 10px #99ff99, 0 0 20px #99ff99;
+        font-size: clamp(8px, 3vw, 12px); /* texto proporcional en móviles */
+        aspect-ratio: 1 / 1;             /* celdas cuadradas */
+        padding: 2px;                     /* padding reducido solo en móviles */
     }
 
     button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background-color: #222;
-      color: #fff;
-      transition: all 0.2s;
+        width: 90%;        /* botón centrado y visible */
+        margin-top: 0px;
+        position: relative;
     }
-
-    button:hover {
-      box-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00;
-    }
-
-    @media (max-width: 400px) {
-      .cell { font-size: 10px; height: 70px; }
-      button { font-size: 14px; padding: 8px 16px; }
-      #instructions { font-size: 12px; }
-    }
+}
   </style>
 </head>
 <body>
-  <main>
-    <h1>🎵 Bingo Musical 🎵</h1>
-    <div id="instructions">
-      Haz click en las casillas cuando salga la canción. Marca líneas horizontales, verticales, diagonales o las cuatro esquinas para ganar.
-    </div>
+  <div class="container">
+    <h1>BingoBeat</h1>
+    <p>Toca la casilla cuando escuches la canción 🎶</p>
     <div id="board"></div>
-    <div>
-      <button id="newCardBtn">Nuevo Cartón</button>
-      <button id="bingoBtn">Verificar Bingo</button>
-    </div>
+    <button id="bingoBtn">¡Bingo!</button>
+  </div>
 
-    <script>
-      const songs = [
-        /* Pega aquí tus 60 canciones exactas de Spotify */
-      ];
+  <script>
+    const songs = [
+      "Lo Que Pasó, Pasó – Daddy Yankee",
+      "Perdóname – Eddie Lover ft. La Factoría",
+      "Dale Don Dale – Don Omar",
+      "Sube la Gárgola – Alex Gargolas ft. Randy & Guelo Star",
+      "Bandoleros – Don Omar ft. Tego Calderón",
+      "Rakata – Wisin & Yandel",
+      "Rompe – Daddy Yankee",
+      "Yo Voy – Zion & Lennox ft. Daddy Yankee",
+      "Gasolina – Daddy Yankee",
+      "La Sensación del Bloque – De La Ghetto ft. Randy",
+      "Atrévete-Te-Te – Calle 13",
+      "Es un Secreto – Plan B",
+      "Dile – Don Omar",
+      "Virtual Diva – Don Omar",
+      "En la Cama – Nicky Jam ft. Daddy Yankee",
+      "Culo – Pitbull ft. Lil Jon",
+      "Ella Me Levantó – Daddy Yankee",
+      "Pasarela – Ñejo & Dálmata",
+      "No Quiere Novio – Ñejo ft. Tego Calderón",
+      "Perreo Baby – Héctor & Tito",
+      "Siente el Boom – Tito El Bambino ft. Randy",
+      "Te Vas – Calle 13",
+      "Yo Quiero Bailar – Ivy Queen",
+      "Ven Báilalo – Angel & Khriz",
+      "Baila Morena – Héctor & Tito ft. Luny Tunes & Noriega",
+      "Papi Chulo (Te Traigo el Mmmm) – Lorna",
+      "Todavía – DJ Pablito ft. La Factoría & Joyce",
+      "Mueve Mami – El Chombo & Aldo Ranks",
+      "Déjale Caer Todo el Peso – Héctor el Father ft. Jomo",
+      "Mayor Que Yo – Wisin & Yandel",
+      "Pose – Daddy Yankee",
+      "Candy – Plan B",
+      "Oye Mi Canto – N.O.R.E. ft. Tego Calderón, Nina Sky, Daddy Yankee & Gem Star",
+      "La Botella – Mach & Daddy",
+      "Salgo Pa' la Calle – Daddy Yankee ft. Randy",
+      "Quitate Tú Pa' Ponerme Yo – Eddy Dee ft. Daddy Yankee, Gallego, Baby Ranks & Yaga & Mackie",
+      "Un Poco Loca – Jowell & Randy ft. De La Ghetto",
+      "Frikitona – Plan B",
+      "Flow Natural – Tito El Bambino ft. Divino & Miniman",
+      "Noche de Sexo – Wisin & Yandel ft. Romeo Santos",
+      "Pa' Que la Pases Bien – Arcángel",
+      "Salió el Sol – Don Omar",
+      "Down – R.K.M & Ken-Y",
+      "Te He Querido, Te He Llorado – Ivy Queen",
+      "Aparentemente – Arcángel & De La Ghetto",
+      "Na De Na – Angel & Khriz",
+      "Fanática Sensual – Plan B",
+      "No Me Dejes Solo – Daddy Yankee ft. Wisin & Yandel",
+      "Impacto – Daddy Yankee",
+      "Danza Kuduro – Don Omar ft. Lucenzo",
+      "Pobre Diabla – Don Omar",
+      "Pam Pam – Wisin & Yandel",
+      "Punto y Aparte – Tego Calderón",
+      "Guatauba – Plan B",
+      "Burn It Up – Wisin & Yandel ft. R. Kelly",
+      "Cochinear – DJ Nelson",
+      "Suave (Remix) – Calle 13",
+      "Bata Bata 2 – Latin Fresh",
+      "Chulin Culin Chunfly – Voltio ft. Calle 13",
+      "Tocarte Toa – Big Yamo ft. Natti Natasha"
+    ];
 
-      function shuffle(array){
-        let currentIndex = array.length, randomIndex;
-        while(currentIndex !== 0){
-          randomIndex = Math.floor(Math.random()*currentIndex);
-          currentIndex--;
-          [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-        }
-        return array;
-      }
+    function generateBoard() {
+      let board = document.getElementById("board");
+      board.innerHTML = "";
+      let shuffled = songs.sort(() => 0.5 - Math.random());
+      let selected = shuffled.slice(0, 24);
+      let idx = 0;
 
-      function generateBoard(){
-        const board = document.getElementById("board");
-        board.innerHTML = "";
-        const shuffled = shuffle([...songs]);
-        const selected = shuffled.slice(0,24);
-        let idx = 0;
-        for(let row=0; row<5; row++){
-          for(let col=0; col<5; col++){
-            const cell = document.createElement("div");
-            cell.className = "cell";
-            cell.dataset.row = row;
-            cell.dataset.col = col;
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          let cell = document.createElement("div");
+          cell.className = "cell";
 
-            if(row===2 && col===2){
-              cell.innerText = "FREE SPACE";
-              cell.classList.add("free","marked");
-            }else{
-              cell.innerText = selected[idx]; idx++;
-            }
-
-            cell.addEventListener("click",()=>{cell.classList.toggle("marked");});
-            board.appendChild(cell);
+          if (row === 2 && col === 2) {
+            cell.innerText = "FREE SPACE";
+            cell.classList.add("free", "marked");
+          } else {
+            cell.innerText = selected[idx];
+            idx++;
           }
+
+          cell.addEventListener("click", () => {
+            cell.classList.toggle("marked");
+          });
+
+          board.appendChild(cell);
         }
       }
+    }
 
-      function countCompletedLines(){
-        const marked = Array.from({length:5},()=>Array(5).fill(false));
-        document.querySelectorAll("#board .cell").forEach(cell=>{
-          const row = Number(cell.dataset.row);
-          const col = Number(cell.dataset.col);
-          marked[row][col]=cell.classList.contains("marked");
+    document.getElementById("bingoBtn").addEventListener("click", () => {
+      const cells = document.querySelectorAll(".cell");
+      const isMarked = (i) => cells[i].classList.contains("marked");
+      let wins = [];
+
+      // Horizontal
+      for (let r = 0; r < 5; r++) {
+        if ([0, 1, 2, 3, 4].every(c => isMarked(r * 5 + c))) wins.push("Línea Horizontal");
+      }
+
+      // Vertical
+      for (let c = 0; c < 5; c++) {
+        if ([0, 1, 2, 3, 4].every(r => isMarked(r * 5 + c))) wins.push("Línea Vertical");
+      }
+
+      // Cuatro Esquinas
+      if (isMarked(0) && isMarked(4) && isMarked(20) && isMarked(24)) wins.push("Cuatro Esquinas");
+
+      // Cartón Lleno
+      if ([...cells].every(c => c.classList.contains("marked"))) wins.push("Cartón Lleno");
+
+      if (wins.length > 0) {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 }
         });
-        let lines=0;
-        for(let i=0;i<5;i++){
-          if(marked[i].every(Boolean)) lines++;
-          if(marked.every(row=>row[i])) lines++;
-        }
-        if([0,1,2,3,4].every(i=>marked[i][i])) lines++;
-        if([0,1,2,3,4].every(i=>marked[i][4-i])) lines++;
-        if(marked[0][0] && marked[0][4] && marked[4][0] && marked[4][4]) lines++;
-        return lines;
+        const msg = wins.includes("Cartón Lleno") ? "¡CARTÓN LLENO!" : [...new Set(wins)].join(", ");
+        alert(`🎉 ¡BINGO! Ganaste con: ${msg}. Verifica con el host.`);
+      } else {
+        alert("❌ Aún no tienes Bingo. ¡Sigue jugando!");
       }
+    });
 
-      document.getElementById("bingoBtn").addEventListener("click",()=>{
-        const lines = countCompletedLines();
-        if(lines>0){
-          alert(`🎉 ¡Bingo! Tienes ${lines} línea(s) completa(s).`);
-        }else{
-          alert("Todavía no completas una línea. ¡Sigue jugando!");
-        }
-      });
-
-      document.getElementById("newCardBtn").addEventListener("click", generateBoard);
-      generateBoard();
-    </script>
-  </main>
+    generateBoard();
+  </script>
 </body>
 </html>
