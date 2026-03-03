@@ -81,6 +81,12 @@ h1 {
     transform: scale(1.05);
 }
 
+.button-wrapper {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
 button {
   background: linear-gradient(90deg, #ff8a00, #e52e71);
   border: none;
@@ -92,8 +98,7 @@ button {
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 
-  width: 100%;
-  margin-top: 20px;
+  flex: 1;
 }
 
 button:hover {
@@ -125,11 +130,7 @@ button:hover {
         padding: 2px;                     /* padding reducido solo en móviles */
     }
 
-    button {
-        width: 90%;        /* botón centrado y visible */
-        margin-top: 0px;
-        position: relative;
-    }
+    /* Button layout is now handled by the .button-wrapper */
 }
   </style>
 </head>
@@ -139,6 +140,7 @@ button:hover {
     <p>Toca la casilla cuando escuches la canción 🎶</p>
     <div id="board"></div>
     <button id="bingoBtn">¡Bingo!</button>
+    <button id="resetBtn">Nuevo cartón</button>
   </div>
 
   <script>
@@ -265,6 +267,12 @@ button:hover {
         alert(`🎉 ¡BINGO! Ganaste con: ${msg}. Verifica con el host.`);
       } else {
         alert("❌ Aún no tienes Bingo. ¡Sigue jugando!");
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("¿Generar nuevo cartón? Se perderá el progreso actual.")) {
+        generateBoard();
       }
     });
 
