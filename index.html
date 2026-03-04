@@ -60,7 +60,7 @@ h1 {
     color: #fff;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 
-    /* 🔹 Truco para que las celdas sean cuadradas y no gigantes */
+    /* ðŸ”¹ Truco para que las celdas sean cuadradas y no gigantes */
     aspect-ratio: 1 / 1; 
     display: flex;
     align-items: center;
@@ -117,7 +117,7 @@ button:hover {
   gap: 20px;
 }
 
-/* 🔹 Ajustes responsivos para móviles modernos */
+/* 🕒 Ajustes responsivos para móviles modernos */
 @media (max-width: 650px) {
     #board {
         gap: 4px;              /* reduce espacio entre celdas */
@@ -137,27 +137,128 @@ button:hover {
 <body>
   <div class="container">
     <h1>BingoBeat</h1>
-    <p>Toca la casilla cuando escuches la canción 🎶</p>
+    <p>Toca la casilla cuando escuches la canción</p>
     <div id="board"></div>
-    <button id="bingoBtn">¡Bingo!</button>
-    <button id="resetBtn">Nuevo cartón</button>
+    <div class="button-wrapper">
+      <button id="bingoBtn">¡Bingo!</button>
+      <button id="resetBtn">Nuevo cartón</button>
+      <button id="logoutBtn">Cerrar sesión</button>
+    </div>
   </div>
 
   <script>
-    // 🔹 Generar o recuperar player ID
-    const playerID = localStorage.getItem('playerID') || `player-${Math.floor(Math.random()*10000)}`;
-    localStorage.setItem('playerID', playerID);
+    // 1. CONFIGURATION & INITIALIZATION
+    const HOST_CODE = "1234";
 
-    // 🔹 Función para guardar celdas marcadas
+    // Create info element to display role/player name without altering layout
+    const info = document.createElement("p");
+    info.style.cssText = "font-size: 0.8rem; color: #fff; margin: -10px 0 10px 0; height: 1em;";
+    document.querySelector(".container").insertBefore(info, document.getElementById('board'));
+
+    function updateInfo() {
+        const role = localStorage.getItem("role");
+        const playerName = localStorage.getItem("playerName");
+        if (role === "host") {
+            info.innerText = "Modo Host: Controlas la sesión.";
+        } else if (playerName) {
+            info.innerText = `Jugador: ${playerName}`;
+        }
+    }
+
+    function initializeUser() {
+        let role = localStorage.getItem("role");
+        if (role) {
+            updateInfo();
+            generateBoard();
+            return;
+        }
+
+        let choice = prompt("Ingresa 'host' para ser anfitrión o 'player' para ser el jugador:");
+        if (choice && choice.toLowerCase() === 'host') {
+            const code = prompt("Ingresa el codigo del anfitrión:");
+            if (code === HOST_CODE) {
+                localStorage.setItem("role", "host");
+                localStorage.removeItem("playerName");
+                alert("¡Eres el anfitrión!");
+                role = 'host';
+            } else {
+                alert("Código incorrecto.");
+            }
+        } else if (choice && choice.toLowerCase() === 'player') {
+            const name = prompt("Ingresa tu nombre:");
+            if (name) {
+                localStorage.setItem("role", "player");
+                localStorage.setItem("playerName", name);
+                role = 'player';
+            } else {
+                alert("Debes ingresar un nombre para jugar.");
+            }
+        }
+
+        if (role) {
+            updateInfo();
+            generateBoard();
+        }
+    }
+    
+    function generateHostList() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+
+  board.style.display = "flex";
+  board.style.flexDirection = "column";
+  board.style.gap = "10px";
+
+  songs.forEach(song => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.style.aspectRatio = "auto";
+    cell.style.padding = "12px";
+
+    cell.innerText = song;
+
+    cell.addEventListener("click", () => {
+      cell.classList.toggle("marked");
+    });
+
+    board.appendChild(cell);
+  });
+}
+
+
+    // 2. LOCALSTORAGE & PLAYER ID FUNCTIONS
+    function getPlayerID() {
+        const role = localStorage.getItem("role");
+        const playerName = localStorage.getItem("playerName");
+        if (role === "host") return "HOST";
+        if (role === "player" && playerName) return `player-${playerName}`;
+        return null; // No role selected
+    }
+
+    function saveBoard(songs) {
+        const playerID = getPlayerID();
+        if (playerID) localStorage.setItem(`${playerID}-board`, JSON.stringify(songs));
+    }
+
+    function loadBoard() {
+        const playerID = getPlayerID();
+        if (!playerID) return null;
+        const savedBoard = localStorage.getItem(`${playerID}-board`);
+        return savedBoard ? JSON.parse(savedBoard) : null;
+    }
+
     function saveMarkedCells() {
+      const playerID = getPlayerID();
+      if (!playerID) return;
       const markedCells = Array.from(document.querySelectorAll("#board .cell")).map(cell =>
         cell.classList.contains("marked")
       );
       localStorage.setItem(`${playerID}-markedCells`, JSON.stringify(markedCells));
     }
 
-    // 🔹 Función para cargar celdas marcadas
     function loadMarkedCells() {
+      const playerID = getPlayerID();
+      if (!playerID) return;
       const saved = JSON.parse(localStorage.getItem(`${playerID}-markedCells`)) || [];
       const cells = document.querySelectorAll("#board .cell");
       cells.forEach((cell, idx) => {
@@ -165,100 +266,128 @@ button:hover {
       });
     }
 
+    // 3. SONG LIST
     const songs = [
-      "Lo Que Pasó, Pasó – Daddy Yankee",
-      "Perdóname – Eddie Lover ft. La Factoría",
-      "Dale Don Dale – Don Omar",
-      "Sube la Gárgola – Alex Gargolas ft. Randy & Guelo Star",
-      "Bandoleros – Don Omar ft. Tego Calderón",
-      "Rakata – Wisin & Yandel",
-      "Rompe – Daddy Yankee",
-      "Yo Voy – Zion & Lennox ft. Daddy Yankee",
-      "Gasolina – Daddy Yankee",
-      "La Sensación del Bloque – De La Ghetto ft. Randy",
-      "Atrévete-Te-Te – Calle 13",
-      "Es un Secreto – Plan B",
-      "Dile – Don Omar",
-      "Virtual Diva – Don Omar",
-      "En la Cama – Nicky Jam ft. Daddy Yankee",
-      "Culo – Pitbull ft. Lil Jon",
-      "Ella Me Levantó – Daddy Yankee",
-      "Pasarela – Ñejo & Dálmata",
-      "No Quiere Novio – Ñejo ft. Tego Calderón",
-      "Perreo Baby – Héctor & Tito",
-      "Siente el Boom – Tito El Bambino ft. Randy",
-      "Te Vas – Calle 13",
-      "Yo Quiero Bailar – Ivy Queen",
-      "Ven Báilalo – Angel & Khriz",
-      "Baila Morena – Héctor & Tito ft. Luny Tunes & Noriega",
-      "Papi Chulo (Te Traigo el Mmmm) – Lorna",
-      "Todavía – DJ Pablito ft. La Factoría & Joyce",
-      "Mueve Mami – El Chombo & Aldo Ranks",
-      "Déjale Caer Todo el Peso – Héctor el Father ft. Jomo",
-      "Mayor Que Yo – Wisin & Yandel",
-      "Pose – Daddy Yankee",
-      "Candy – Plan B",
-      "Oye Mi Canto – N.O.R.E. ft. Tego Calderón, Nina Sky, Daddy Yankee & Gem Star",
-      "La Botella – Mach & Daddy",
-      "Salgo Pa' la Calle – Daddy Yankee ft. Randy",
-      "Quitate Tú Pa' Ponerme Yo – Eddy Dee ft. Daddy Yankee, Gallego, Baby Ranks & Yaga & Mackie",
-      "Un Poco Loca – Jowell & Randy ft. De La Ghetto",
-      "Frikitona – Plan B",
-      "Flow Natural – Tito El Bambino ft. Divino & Miniman",
-      "Noche de Sexo – Wisin & Yandel ft. Romeo Santos",
-      "Pa' Que la Pases Bien – Arcángel",
-      "Salió el Sol – Don Omar",
-      "Down – R.K.M & Ken-Y",
-      "Te He Querido, Te He Llorado – Ivy Queen",
-      "Aparentemente – Arcángel & De La Ghetto",
-      "Na De Na – Angel & Khriz",
-      "Fanática Sensual – Plan B",
-      "No Me Dejes Solo – Daddy Yankee ft. Wisin & Yandel",
-      "Impacto – Daddy Yankee",
-      "Danza Kuduro – Don Omar ft. Lucenzo",
-      "Pobre Diabla – Don Omar",
-      "Pam Pam – Wisin & Yandel",
-      "Punto y Aparte – Tego Calderón",
-      "Guatauba – Plan B",
-      "Burn It Up – Wisin & Yandel ft. R. Kelly",
-      "Cochinear – DJ Nelson",
-      "Suave (Remix) – Calle 13",
-      "Bata Bata 2 – Latin Fresh",
-      "Chulin Culin Chunfly – Voltio ft. Calle 13",
-      "Tocarte Toa – Big Yamo ft. Natti Natasha"
+  "Lo Que Pasó, Pasó – Daddy Yankee",
+  "Perdóname – Eddie Lover ft. La Factoría",
+  "Dale Don Dale – Don Omar",
+  "Sube la Gárgola – Alex Gargolas ft. Randy & Guelo Star",
+  "Bandoleros – Don Omar ft. Tego Calderón",
+  "Rakata – Wisin & Yandel",
+  "Rompe – Daddy Yankee",
+  "Yo Voy – Zion & Lennox ft. Daddy Yankee",
+  "Gasolina – Daddy Yankee",
+  "La Sensación del Bloque – De La Ghetto ft. Randy",
+  "Atrévete-Te-Te – Calle 13",
+  "Es un Secreto – Plan B",
+  "Dile – Don Omar",
+  "Virtual Diva – Don Omar",
+  "En la Cama – Nicky Jam ft. Daddy Yankee",
+  "Culo – Pitbull ft. Lil Jon",
+  "Ella Me Levantó – Daddy Yankee",
+  "Pasarela – Ñejo & Dálmata",
+  "No Quiere Novio – Ñejo ft. Tego Calderón",
+  "Perreo Baby – Héctor & Tito",
+  "Siente el Boom – Tito El Bambino ft. Randy",
+  "Te Vas – Calle 13",
+  "Yo Quiero Bailar – Ivy Queen",
+  "Ven Báilalo – Angel & Khriz",
+  "Baila Morena – Héctor & Tito ft. Luny Tunes & Noriega",
+  "Papi Chulo (Te Traigo el Mmmm) – Lorna",
+  "Todavía – DJ Pablito ft. La Factoría & Joyce",
+  "Mueve Mami – El Chombo & Aldo Ranks",
+  "Déjale Caer Todo el Peso – Héctor el Father ft. Jomo",
+  "Mayor Que Yo – Wisin & Yandel",
+  "Pose – Daddy Yankee",
+  "Candy – Plan B",
+  "Oye Mi Canto – N.O.R.E. ft. Tego Calderón, Nina Sky, Daddy Yankee & Gem Star",
+  "La Botella – Mach & Daddy",
+  "Salgo Pa' la Calle – Daddy Yankee ft. Randy",
+  "Quítate Tú Pa' Ponerme Yo – Eddy Dee ft. Daddy Yankee, Gallego, Baby Ranks & Yaga & Mackie",
+  "Un Poco Loca – Jowell & Randy ft. De La Ghetto",
+  "Frikitona – Plan B",
+  "Flow Natural – Tito El Bambino ft. Divino & Miniman",
+  "Noche de Sexo – Wisin & Yandel ft. Romeo Santos",
+  "Pa' Que la Pases Bien – Arcángel",
+  "Salió el Sol – Don Omar",
+  "Down – R.K.M & Ken-Y",
+  "Te He Querido, Te He Llorado – Ivy Queen",
+  "Aparentemente – Arcángel & De La Ghetto",
+  "Na De Na – Angel & Khriz",
+  "Fanática Sensual – Plan B",
+  "No Me Dejes Solo – Daddy Yankee ft. Wisin & Yandel",
+  "Impacto – Daddy Yankee",
+  "Danza Kuduro – Don Omar ft. Lucenzo",
+  "Pobre Diabla – Don Omar",
+  "Pam Pam – Wisin & Yandel",
+  "Punto y Aparte – Tego Calderón",
+  "Guatauba – Plan B",
+  "Burn It Up – Wisin & Yandel ft. R. Kelly",
+  "Cochinear – DJ Nelson",
+  "Suave (Remix) – Calle 13",
+  "Bata Bata 2 – Latin Fresh",
+  "Chulin Culin Chunfly – Voltio ft. Calle 13",
+  "Tocarte Toa – Big Yamo ft. Natti Natasha"
     ];
 
+    // 4. BOARD GENERATION
     function generateBoard() {
-      let board = document.getElementById("board");
-      board.innerHTML = "";
-      let shuffled = songs.sort(() => 0.5 - Math.random());
-      let selected = shuffled.slice(0, 24);
-      let idx = 0;
 
-      for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 5; col++) {
-          let cell = document.createElement("div");
-          cell.className = "cell";
+    const role = localStorage.getItem("role");
 
-          if (row === 2 && col === 2) {
-            cell.innerText = "FREE SPACE";
-            cell.classList.add("free", "marked");
-          } else {
-            cell.innerText = selected[idx];
-            idx++;
-          }
-
-          cell.addEventListener("click", () => {
-            cell.classList.toggle("marked");
-            saveMarkedCells();
-          });
-
-          board.appendChild(cell);
-        }
-      }
-      loadMarkedCells();
+    // 🔹 SI ES HOST → mostrar lista vertical
+    if (role === "host") {
+        generateHostList();
+        return;
     }
 
+    // 🔹 SI ES PLAYER → generar cartón normal
+    let board = document.getElementById("board");
+    board.innerHTML = "";
+
+    board.style.display = "grid";
+    board.style.gridTemplateColumns = "repeat(5, 1fr)";
+    board.style.gap = "4px";
+
+    let selectedSongs = loadBoard();
+
+    if (!selectedSongs) {
+        let shuffled = [...songs].sort(() => 0.5 - Math.random());
+        selectedSongs = shuffled.slice(0, 24);
+        saveBoard(selectedSongs);
+    }
+
+    let idx = 0;
+
+    for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+
+            let cell = document.createElement("div");
+            cell.className = "cell";
+
+            if (row === 2 && col === 2) {
+                cell.innerText = "FREE SPACE";
+                cell.classList.add("free", "marked");
+            } else {
+                cell.innerText = selectedSongs[idx];
+                idx++;
+            }
+
+            cell.addEventListener("click", () => {
+                if (!cell.classList.contains('free')) {
+                    cell.classList.toggle("marked");
+                    saveMarkedCells();
+                }
+            });
+
+            board.appendChild(cell);
+        }
+    }
+
+    loadMarkedCells();
+}
+
+    // 5. BUTTON EVENT LISTENERS
     document.getElementById("bingoBtn").addEventListener("click", () => {
       const cells = document.querySelectorAll(".cell");
       const isMarked = (i) => cells[i].classList.contains("marked");
@@ -295,12 +424,35 @@ button:hover {
 
     document.getElementById("resetBtn").addEventListener("click", () => {
       if (confirm("¿Generar nuevo cartón? Se perderá el progreso actual.")) {
-        localStorage.removeItem(`${playerID}-markedCells`);
+        const playerID = getPlayerID();
+        if (playerID) {
+            localStorage.removeItem(`${playerID}-markedCells`);
+            localStorage.removeItem(`${playerID}-board`);
+        }
         generateBoard();
       }
     });
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      const role = localStorage.getItem("role");
+      const playerName = localStorage.getItem("playerName");
+      const playerID = role === "host" ? "HOST" : (playerName ? `player-${playerName}` : null);
 
-    generateBoard();
+      if (playerID) {
+        localStorage.removeItem(`${playerID}-markedCells`);
+        localStorage.removeItem(`${playerID}-board`);
+      }
+
+      localStorage.removeItem("role");
+      localStorage.removeItem("playerName");
+      info.innerText = "";
+      document.getElementById("board").innerHTML = "";
+      initializeUser();
+    });
+
+    // 6. APP START
+    initializeUser();
   </script>
 </body>
 </html>
+
+
