@@ -3,41 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BingoBeat</title>
+  <title>BingoBeat</title> 
 
-  <!-- 👇 PÉGALO AQUÍ -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <style>
-  body {
+ <style>
+body {
   font-family: 'Arial', sans-serif;
   background: radial-gradient(circle at top, #1a1a1a, #000000 70%);
   color: #fff;
   text-align: center;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
-
 h1 {
     font-size: 2.5rem;
     text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
     margin-bottom: 80px;
 }
-
 #board {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0,1fr));
   gap: 4px;
   width: 100%;
+  max-width: 420px;
   margin: 0 auto 60px auto;
+
+  align-items: stretch;
 }
-#board div {
+#board .cell {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,12 +62,15 @@ h1 {
     color: #fff;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 
-    /* 🕒 Truco para que las celdas sean cuadradas y no gigantes */
+    word-break: break-word;
+    overflow: hidden;
+    text-align: center;
+
     aspect-ratio: 1 / 1; 
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0; /* quitamos el padding que las inflaba */
+    padding: 6px;
 }
 
 .cell:hover {
@@ -90,6 +90,7 @@ h1 {
   display: flex;
   gap: 15px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 button {
@@ -273,66 +274,42 @@ button:hover {
 
     // 3. SONG LIST
     const songs = [
-  "Lo Que Pasó, Pasó – Daddy Yankee",
-  "Perdóname – Eddie Lover ft. La Factoría",
-  "Dale Don Dale – Don Omar",
-  "Sube la Gárgola – Alex Gargolas ft. Randy & Guelo Star",
-  "Bandoleros – Don Omar ft. Tego Calderón",
-  "Rakata – Wisin & Yandel",
-  "Rompe – Daddy Yankee",
-  "Yo Voy – Zion & Lennox ft. Daddy Yankee",
   "Gasolina – Daddy Yankee",
-  "La Sensación del Bloque – De La Ghetto ft. Randy",
-  "Atrévete-Te-Te – Calle 13",
-  "Es un Secreto – Plan B",
-  "Dile – Don Omar",
-  "Virtual Diva – Don Omar",
-  "En la Cama – Nicky Jam ft. Daddy Yankee",
-  "Culo – Pitbull ft. Lil Jon",
-  "Ella Me Levantó – Daddy Yankee",
-  "Pasarela – Ñejo & Dálmata",
-  "No Quiere Novio – Ñejo ft. Tego Calderón",
-  "Perreo Baby – Héctor & Tito",
-  "Siente el Boom – Tito El Bambino ft. Randy",
-  "Te Vas – Calle 13",
-  "Yo Quiero Bailar – Ivy Queen",
-  "Ven Báilalo – Angel & Khriz",
-  "Baila Morena – Héctor & Tito ft. Luny Tunes & Noriega",
-  "Papi Chulo (Te Traigo el Mmmm) – Lorna",
-  "Todavía – DJ Pablito ft. La Factoría & Joyce",
-  "Mueve Mami – El Chombo & Aldo Ranks",
-  "Déjale Caer Todo el Peso – Héctor el Father ft. Jomo",
+  "Rakata – Wisin & Yandel",
+  "Se Preparó – Ozuna",
+  "Danza Kuduro – Don Omar",
+  "Whine Up – Nicky Jam",
+  "Despeinada – Ozuna",
   "Mayor Que Yo – Wisin & Yandel",
-  "Pose – Daddy Yankee",
-  "Candy – Plan B",
-  "Oye Mi Canto – N.O.R.E. ft. Tego Calderón, Nina Sky, Daddy Yankee & Gem Star",
-  "La Botella – Mach & Daddy",
-  "Salgo Pa' la Calle – Daddy Yankee ft. Randy",
-  "Quítate Tú Pa' Ponerme Yo – Eddy Dee ft. Daddy Yankee, Gallego, Baby Ranks & Yaga & Mackie",
-  "Un Poco Loca – Jowell & Randy ft. De La Ghetto",
-  "Frikitona – Plan B",
-  "Flow Natural – Tito El Bambino ft. Divino & Miniman",
-  "Noche de Sexo – Wisin & Yandel ft. Romeo Santos",
-  "Pa' Que la Pases Bien – Arcángel",
-  "Salió el Sol – Don Omar",
-  "Down – R.K.M & Ken-Y",
-  "Te He Querido, Te He Llorado – Ivy Queen",
-  "Aparentemente – Arcángel & De La Ghetto",
-  "Na De Na – Angel & Khriz",
-  "Fanática Sensual – Plan B",
-  "No Me Dejes Solo – Daddy Yankee ft. Wisin & Yandel",
-  "Impacto – Daddy Yankee",
-  "Danza Kuduro – Don Omar ft. Lucenzo",
-  "Pobre Diabla – Don Omar",
   "Pam Pam – Wisin & Yandel",
-  "Punto y Aparte – Tego Calderón",
-  "Guatauba – Plan B",
-  "Burn It Up – Wisin & Yandel ft. R. Kelly",
-  "Cochinear – DJ Nelson",
-  "Suave (Remix) – Calle 13",
-  "Bata Bata 2 – Latin Fresh",
-  "Chulin Culin Chunfly – Voltio ft. Calle 13",
-  "Tocarte Toa – Big Yamo ft. Natti Natasha"
+  "Yo Quiero Bailar – Ivy Queen",
+  "Atrévete-Te-Te – Calle 13",
+  "Se Vale To-To – Calle 13",
+  "Pasarela – Ñejo & Dálmata",
+  "Ven Báilalo – Angel & Khriz",
+  "Secreto – Anuel AA",
+  "Otra Vez – Zion & Lennox",
+  "Un Baile Inolvidable – Bad Bunny",
+  "Eoo – Bad Bunny",
+  "Solcito – Juan Duque",
+  "Dákiti – Bad Bunny",
+  "Tití Me Preguntó – Bad Bunny",
+  "Safaera – Bad Bunny",
+  "Callaíta – Bad Bunny",
+  "Yandel 150 – Yandel",
+  "Bichota – Karol G",
+  "Tusa – Karol G",
+  "Provenza – Karol G",
+  "Amargura – Karol G",
+  "LALA – Myke Towers",
+  "La Curiosidad – Jay Wheeler",
+  "Pepas – Farruko",
+  "Normal – Feid",
+  "Ferxxo 100 – Feid",
+  "Hey Mor – Ozuna",
+  "Abusadora – Wisin & Yandel",
+  "Algo Me Gusta de Ti – Wisin & Yandel",
+  "Pegao – Wisin & Yandel"
     ];
 
     // 4. BOARD GENERATION
@@ -351,7 +328,7 @@ button:hover {
     board.innerHTML = "";
 
     board.style.display = "grid";
-    board.style.gridTemplateColumns = "repeat(5, 1fr)";
+    board.style.gridTemplateColumns = "repeat(5, minmax(0,1fr))";
     board.style.gap = "4px";
 
     let selectedSongs = loadBoard();
