@@ -304,6 +304,68 @@ button:hover {
   color: #fff;
   font-size: 1.4rem;
 }
+   /* Celebración de Bingo */
+.bingo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.bingo-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.bingo-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  padding: 34px 26px;
+  box-sizing: border-box;
+  border: 2px solid #00ffcc;
+  border-radius: 24px;
+  background: radial-gradient(circle at top, #1b1b1b, #050505 78%);
+  box-shadow: 0 0 35px rgba(0, 255, 204, 0.42);
+}
+
+.bingo-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.bingo-modal-card h2 {
+  margin: 0;
+  color: #00ffcc;
+  font-size: 2rem;
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.55);
+}
+
+.bingo-modal-card p {
+  margin: 12px 0 24px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+}
+
+.bingo-modal-card button:not(.modal-close) {
+  width: 100%;
+  flex: none;
+}
+
+.bingo-modal-card.not-yet {
+  border-color: #ff8a00;
+  box-shadow: 0 0 30px rgba(255, 138, 0, 0.3);
+}
+
+.bingo-modal-card.not-yet h2 {
+  color: #ff8a00;
+  text-shadow: 0 0 15px rgba(255, 138, 0, 0.45);
+}
   </style> 
 </head>
 <body>
@@ -348,6 +410,19 @@ button:hover {
       <button type="button" id="entryCancelBtn" class="modal-cancel">Cancelar</button>
       <button type="button" id="entryConfirmBtn">Continuar</button>
     </div>
+  </div>
+</div>
+<div id="bingoModal" class="bingo-modal" hidden>
+  <div id="bingoModalBackdrop" class="bingo-modal-backdrop"></div>
+
+  <div id="bingoModalCard" class="bingo-modal-card" role="dialog" aria-modal="true">
+    <button type="button" id="bingoModalCloseBtn" class="modal-close" aria-label="Cerrar">×</button>
+
+    <div id="bingoModalIcon" class="bingo-modal-icon">🎉</div>
+    <h2 id="bingoModalTitle">¡BINGO!</h2>
+    <p id="bingoModalMessage"></p>
+
+    <button type="button" id="bingoModalConfirmBtn">Seguir jugando</button>
   </div>
 </div>
   <div class="container" id="gameScreen" hidden>
