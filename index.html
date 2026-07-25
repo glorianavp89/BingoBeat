@@ -137,11 +137,121 @@ button:hover {
     }
 
     /* Button layout is now handled by the .button-wrapper */
+} /* Pantalla de bienvenida: no modifica el tablero ni la lista del anfitrión */
+[hidden] {
+  display: none !important;
 }
-  </style>
+
+#welcomeScreen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.welcome-card {
+  width: min(100%, 460px);
+  padding: 34px 26px;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.16);
+}
+
+#welcomeScreen h1 {
+  margin: 0;
+  font-size: 3rem;
+  color: #00ffcc;
+  text-shadow: 0 0 18px rgba(0, 255, 204, 0.6);
+}
+
+.welcome-subtitle {
+  margin: 12px 0 30px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.role-options {
+  display: grid;
+  gap: 14px;
+}
+
+.role-entry {
+  width: 100%;
+  flex: none;
+  padding: 18px 20px;
+  text-align: left;
+}
+
+.role-entry strong,
+.role-entry span {
+  display: block;
+}
+
+.role-entry strong {
+  font-size: 1.1rem;
+}
+
+.role-entry span {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+#playerEntryBtn {
+  background: linear-gradient(135deg, #00c9a7, #00ffcc);
+  color: #111;
+  box-shadow: 0 0 18px rgba(0, 255, 204, 0.35);
+}
+
+#playerEntryBtn:hover {
+  background: linear-gradient(135deg, #00ffcc, #00c9a7);
+}
+
+.welcome-instructions {
+  margin-top: 22px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.welcome-instructions summary {
+  cursor: pointer;
+  color: #00ffcc;
+}
+
+.welcome-instructions p {
+  margin: 8px 0 0;
+  line-height: 1.45;
+}
+  </style> 
 </head>
 <body>
-  <div class="container">
+  <section id="welcomeScreen">
+  <div class="welcome-card">
+    <h1>BingoBeat</h1>
+    <p class="welcome-subtitle">Tu música. Tu cartón. Tu fiesta.</p>
+
+    <div class="role-options">
+      <button type="button" id="playerEntryBtn" class="role-entry">
+        <strong>🎮 Quiero jugar</strong>
+        <span>Escribe tu nombre y recibe tu cartón musical.</span>
+      </button>
+
+      <button type="button" id="hostEntryBtn" class="role-entry">
+        <strong>🎤 Soy anfitrión</strong>
+        <span>Controla las canciones que ya han salido.</span>
+      </button>
+    </div>
+
+    <details class="welcome-instructions">
+      <summary>Instrucciones del juego</summary>
+      <p>Jugadores: marquen una canción cuando la escuchen.</p>
+      <p>Anfitrión: usa el código <strong>1234</strong> para entrar.</p>
+    </details>
+  </div>
+</section>
+  <div class="container" id="gameScreen" hidden>
     <h1>BingoBeat</h1>
     <p>Toca la casilla cuando escuches la canción</p>
     <div id="board"></div>
@@ -170,43 +280,60 @@ button:hover {
             info.innerText = `Jugador: ${playerName}`;
         }
     }
+    function showWelcomeScreen() {
+  document.getElementById("welcomeScreen").hidden = false;
+  document.getElementById("gameScreen").hidden = true;
+}
 
-    function initializeUser() {
-        let role = localStorage.getItem("role");
-        if (role) {
-            updateInfo();
-            generateBoard();
-            return;
-        }
+function showGameScreen() {
+  document.getElementById("welcomeScreen").hidden = true;
+  document.getElementById("gameScreen").hidden = false;
+}
 
-        let choice = prompt("Ingresa 'Host' para ser anfitrión o 'Player' para ser el jugador:");
-        if (choice && choice.toLowerCase() === 'Host') {
-            const code = prompt("Ingresa el codigo del anfitrión:");
-            if (code === HOST_CODE) {
-                localStorage.setItem("role", "Host");
-                localStorage.removeItem("playerName");
-                alert("¡Eres el anfitrión!");
-                role = 'Host';
-            } else {
-                alert("Código incorrecto.");
-            }
-        } else if (choice && choice.toLowerCase() === 'Player') {
-            const name = prompt("Ingresa tu nombre:");
-            if (name) {
-                localStorage.setItem("role", "Player");
-                localStorage.setItem("playerName", name);
-                role = 'Player';
-            } else {
-                alert("Debes ingresar un nombre para jugar.");
-            }
-        }
+function initializeUser() {
+  const role = localStorage.getItem("role");
 
-        if (role) {
-            updateInfo();
-            generateBoard();
-        }
-    }
-    
+  if (role === "host" || role === "player") {
+    showGameScreen();
+    updateInfo();
+    generateBoard();
+    return;
+  }
+
+  showWelcomeScreen();
+}
+
+document.getElementById("playerEntryBtn").addEventListener("click", () => {
+  const name = prompt("Escribe tu nombre para crear tu cartón:");
+
+  if (!name) {
+    return;
+  }
+
+  localStorage.setItem("role", "player");
+  localStorage.setItem("playerName", name);
+
+  showGameScreen();
+  updateInfo();
+  generateBoard();
+});
+
+document.getElementById("hostEntryBtn").addEventListener("click", () => {
+  const code = prompt("Ingresa el código de anfitrión:");
+
+  if (code !== HOST_CODE) {
+    alert("Código incorrecto.");
+    return;
+  }
+
+  localStorage.setItem("role", "host");
+  localStorage.removeItem("playerName");
+
+  alert("¡Eres el anfitrión!");
+  showGameScreen();
+  updateInfo();
+  generateBoard();
+}); 
     function generateHostList() {
   const board = document.getElementById("board");
   board.innerHTML = "";
