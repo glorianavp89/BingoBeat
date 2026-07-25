@@ -179,23 +179,23 @@ button:hover {
             return;
         }
 
-        let choice = prompt("Ingresa 'host' para ser anfitrión o 'player' para ser el jugador:");
-        if (choice && choice.toLowerCase() === 'host') {
+        let choice = prompt("Ingresa 'Host' para ser anfitrión o 'Player' para ser el jugador:");
+        if (choice && choice.toLowerCase() === 'Host') {
             const code = prompt("Ingresa el codigo del anfitrión:");
             if (code === HOST_CODE) {
-                localStorage.setItem("role", "host");
+                localStorage.setItem("role", "Host");
                 localStorage.removeItem("playerName");
                 alert("¡Eres el anfitrión!");
-                role = 'host';
+                role = 'Host';
             } else {
                 alert("Código incorrecto.");
             }
-        } else if (choice && choice.toLowerCase() === 'player') {
+        } else if (choice && choice.toLowerCase() === 'Player') {
             const name = prompt("Ingresa tu nombre:");
             if (name) {
-                localStorage.setItem("role", "player");
+                localStorage.setItem("role", "Player");
                 localStorage.setItem("playerName", name);
-                role = 'player';
+                role = 'Player';
             } else {
                 alert("Debes ingresar un nombre para jugar.");
             }
