@@ -331,6 +331,25 @@ button:hover {
     </details>
   </div>
 </section>
+  <div id="entryModal" class="entry-modal" hidden>
+  <div id="entryModalBackdrop" class="entry-modal-backdrop"></div>
+
+  <div class="entry-modal-card" role="dialog" aria-modal="true">
+    <button type="button" id="entryCloseBtn" class="modal-close" aria-label="Cerrar">×</button>
+
+    <h2 id="entryTitle">Bienvenida</h2>
+    <p id="entryDescription"></p>
+
+    <input id="entryInput" type="text" autocomplete="off">
+
+    <p id="entryError" hidden></p>
+
+    <div class="modal-actions">
+      <button type="button" id="entryCancelBtn" class="modal-cancel">Cancelar</button>
+      <button type="button" id="entryConfirmBtn">Continuar</button>
+    </div>
+  </div>
+</div>
   <div class="container" id="gameScreen" hidden>
     <h1>BingoBeat</h1>
     <p>Toca la casilla cuando escuches la canción</p>
@@ -383,36 +402,94 @@ function initializeUser() {
   showWelcomeScreen();
 }
 
-document.getElementById("playerEntryBtn").addEventListener("click", () => {
-  const name = prompt("Escribe tu nombre para crear tu cartón:");
+let entryMode = "";
 
-  if (!name) {
+const entryModal = document.getElementById("entryModal");
+const entryTitle = document.getElementById("entryTitle");
+const entryDescription = document.getElementById("entryDescription");
+const entryInput = document.getElementById("entryInput");
+const entryError = document.getElementById("entryError");
+
+function openEntryModal(mode) {
+  entryMode = mode;
+  entryInput.value = "";
+  entryError.hidden = true;
+
+  if (mode === "player") {
+    entryTitle.innerText = "¡Vamos a jugar!";
+    entryDescription.innerText = "Escribe tu nombre para crear tu cartón.";
+    entryInput.type = "text";
+    entryInput.placeholder = "Tu nombre";
+  } else {
+    entryTitle.innerText = "Modo anfitrión";
+    entryDescription.innerText = "Ingresa el código para controlar la sesión.";
+    entryInput.type = "password";
+    entryInput.inputMode = "numeric";
+    entryInput.placeholder = "Código de anfitrión";
+  }
+
+  entryModal.hidden = false;
+  entryInput.focus();
+}
+
+function closeEntryModal() {
+  entryModal.hidden = true;
+  entryInput.value = "";
+  entryError.hidden = true;
+}
+
+function submitEntryModal() {
+  const value = entryInput.value.trim();
+
+  if (!value) {
+    entryError.innerText = "Completa este campo para continuar.";
+    entryError.hidden = false;
     return;
   }
 
-  localStorage.setItem("role", "player");
-  localStorage.setItem("playerName", name);
+  if (entryMode === "player") {
+    localStorage.setItem("role", "player");
+    localStorage.setItem("playerName", value);
 
-  showGameScreen();
-  updateInfo();
-  generateBoard();
-});
+    closeEntryModal();
+    showGameScreen();
+    updateInfo();
+    generateBoard();
+    return;
+  }
 
-document.getElementById("hostEntryBtn").addEventListener("click", () => {
-  const code = prompt("Ingresa el código de anfitrión:");
-
-  if (code !== HOST_CODE) {
-    alert("Código incorrecto.");
+  if (value !== HOST_CODE) {
+    entryError.innerText = "Código incorrecto. Inténtalo nuevamente.";
+    entryError.hidden = false;
     return;
   }
 
   localStorage.setItem("role", "host");
   localStorage.removeItem("playerName");
 
-  alert("¡Eres el anfitrión!");
+  closeEntryModal();
   showGameScreen();
   updateInfo();
   generateBoard();
+}
+
+document.getElementById("playerEntryBtn").addEventListener("click", () => {
+  openEntryModal("player");
+});
+
+document.getElementById("hostEntryBtn").addEventListener("click", () => {
+  openEntryModal("host");
+});
+
+document.getElementById("entryConfirmBtn").addEventListener("click", submitEntryModal);
+document.getElementById("entryCancelBtn").addEventListener("click", closeEntryModal);
+document.getElementById("entryCloseBtn").addEventListener("click", closeEntryModal);
+document.getElementById("entryModalBackdrop").addEventListener("click", closeEntryModal);
+
+entryInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    submitEntryModal();
+  }
 }); 
     function generateHostList() {
   const board = document.getElementById("board");
