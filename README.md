@@ -12,6 +12,8 @@ Características
 🙋 Modo Jugador.
 🎉 Verificación de Bingo.
 🚀 Instalable como PWA.
+
+
 Tecnologías
 HTML5
 CSS3
@@ -30,6 +32,7 @@ Roadmap
  Validación automática
  Eventos en línea
  Versión Premium
+ 
 Aviso legal
 
 Esta aplicación:
