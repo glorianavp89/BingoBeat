@@ -1,10 +1,12 @@
 {
-  "name": "Bingo Musical",
-  "short_name": "Bingo",
-  "start_url": "./?v=1",
+  "name": "BingoBeat",
+  "short_name": "BingoBeat",
+  "description": "La forma más divertida de jugar bingo musical.",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#39ff14",
+  "theme_color": "#00ffcc",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon.png",
